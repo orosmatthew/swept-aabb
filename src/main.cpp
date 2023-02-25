@@ -1,27 +1,40 @@
-#include <iostream>
+#include <raylib-cpp.hpp>
 
-#include "rock_paper_scissors.hpp"
+#include "fixed_loop.hpp"
+
+namespace rl = raylib;
+
+struct GameState {
+    rl::Window window;
+    util::FixedLoop fixed_loop;
+};
+
+static void main_loop(void* game_state_ptr)
+{
+    GameState& state = *static_cast<GameState*>(game_state_ptr);
+
+    state.fixed_loop.update(20, []() {
+
+    });
+
+    BeginDrawing();
+    ClearBackground(BLACK);
+    DrawFPS(10, 10);
+    EndDrawing();
+}
 
 int main()
 {
-    // Initial simulation configuration
-    rps::RockPaperScissorsConfig config {
-        .screen_width = 1200,
-        .screen_height = 800,
-        .simulation_rate = 45,
-        .piece_size = 28,
-        .piece_count = 125,
-        .volume = 0.5f,
-        .piece_samples = 10,
-    };
+    SetConfigFlags(FLAG_VSYNC_HINT);
+    SetConfigFlags(FLAG_MSAA_4X_HINT);
+    rl::Window window(800, 600, "Swept AABB");
 
-    // Run game
-    try {
-        rps::run(config);
-    }
-    catch (std::exception& e) {
-        std::cerr << "[ERROR] " << e.what() << std::endl;
-        return EXIT_FAILURE;
+    util::FixedLoop fixed_loop(60.0f);
+
+    GameState state { .window = window, .fixed_loop = util::FixedLoop(60.0f) };
+
+    while (!state.window.ShouldClose()) {
+        main_loop(&state);
     }
 
     return EXIT_SUCCESS;
